@@ -1,5 +1,6 @@
 import {
     EventRef,
+    HeadingCache,
     MetadataCache,
     SectionCache,
     TAbstractFile,
@@ -222,6 +223,12 @@ export class Cache {
             return task.path !== file.path;
         });
 
+        // For each headings retrieve the lineNumber and the all applicable headings
+        const nestedHeadings: [number, HeadingCache[]][] =
+            this.getNestedHeadings({
+                headings: fileCache.headings,
+            });
+
         // We want to store section information with every task so
         // that we can use that when we post process the markdown
         // rendered lists.
@@ -258,6 +265,10 @@ export class Cache {
                         lineNumberTask: listItem.position.start.line,
                         sections: fileCache.sections,
                         fileLines,
+                    }),
+                    headings: this.getHeadings({
+                        lineNumberTask: listItem.position.start.line,
+                        nestedHeadings,
                     }),
                 });
 
@@ -335,5 +346,46 @@ export class Cache {
         } else {
             return headerMatch[1];
         }
+    }
+
+    private getHeadings({
+        lineNumberTask,
+        nestedHeadings,
+    }: {
+        lineNumberTask: number;
+        nestedHeadings: [number, HeadingCache[]][];
+    }): string[] {
+        for (const nestedHeading of nestedHeadings) {
+            const [lineNumberHeading, headings] = nestedHeading;
+            if (lineNumberHeading < lineNumberTask) {
+                return headings.map((h) => h.heading);
+            }
+        }
+        // Should never go there as nestedHeadings should alway have a lineNumberHeading lesser than 0.
+        return [];
+    }
+
+    private getNestedHeadings({
+        headings,
+    }: {
+        headings: HeadingCache[] | undefined;
+    }): [number, HeadingCache[]][] {
+        const nestedHeadings: [number, HeadingCache[]][] = [[-1, []]];
+        if (headings === undefined) {
+            return nestedHeadings;
+        }
+
+        let previousHeadings: HeadingCache[] = [];
+        for (const heading of headings) {
+            previousHeadings = previousHeadings.filter(
+                (h) => h.level < heading.level,
+            );
+            previousHeadings.push(heading);
+            nestedHeadings.push([
+                heading.position.start.line,
+                previousHeadings,
+            ]);
+        }
+        return nestedHeadings.reverse();
     }
 }

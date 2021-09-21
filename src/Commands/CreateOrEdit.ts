@@ -50,6 +50,7 @@ const taskFromLine = ({ line, path }: { line: string; path: string }): Task => {
         sectionStart: 0, // We don't need this to toggle it here in the editor.
         sectionIndex: 0, // We don't need this to toggle it here in the editor.
         precedingHeader: null, // We don't need this to toggle it here in the editor.
+        headings: [],
     });
 
     if (task !== null) {
@@ -76,6 +77,7 @@ const taskFromLine = ({ line, path }: { line: string; path: string }): Task => {
             sectionStart: 0,
             sectionIndex: 0,
             precedingHeader: null,
+            headings: [],
             blockLink: '',
         });
     }
@@ -106,5 +108,6 @@ const taskFromLine = ({ line, path }: { line: string; path: string }): Task => {
         sectionStart: 0,
         sectionIndex: 0,
         precedingHeader: null,
+        headings: [],
     });
 };

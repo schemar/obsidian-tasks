@@ -19,6 +19,7 @@ it('parses a task from a line', () => {
         sectionStart,
         sectionIndex,
         precedingHeader,
+        headings: [precedingHeader],
     });
 
     // Assert
@@ -50,6 +51,7 @@ it('allows signifier emojis as part of the description', () => {
         sectionStart,
         sectionIndex,
         precedingHeader,
+        headings: [precedingHeader],
     });
 
     // Assert
@@ -81,6 +83,7 @@ it('also works with block links and trailing spaces', () => {
         sectionStart,
         sectionIndex,
         precedingHeader,
+        headings: [precedingHeader],
     });
 
     // Assert

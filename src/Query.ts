@@ -28,6 +28,9 @@ export class Query {
     private readonly headingRegexp =
         /^heading (includes|does not include) (.*)/;
 
+    private readonly anyHeadingRegexp =
+        /^any heading (includes|does not include) (.*)/;
+
     private readonly hideOptionsRegexp =
         /^hide (task count|backlink|done date|due date|recurrence rule|edit button)/;
 
@@ -85,6 +88,9 @@ export class Query {
                         break;
                     case this.headingRegexp.test(line):
                         this.parseHeadingFilter({ line });
+                        break;
+                    case this.anyHeadingRegexp.test(line):
+                        this.parseAnyHeadingFilter({ line });
                         break;
                     case this.limitRegexp.test(line):
                         this.parseLimit({ line });
@@ -272,6 +278,38 @@ export class Query {
             }
         } else {
             this._error = 'do not understand query filter (heading)';
+        }
+    }
+
+    private parseAnyHeadingFilter({ line }: { line: string }): void {
+        const anyHeadingMatch = line.match(this.anyHeadingRegexp);
+        if (anyHeadingMatch !== null) {
+            const filterMethod = anyHeadingMatch[1].toLowerCase();
+            if (filterMethod === 'includes') {
+                this._filters.push(
+                    (task: Task) =>
+                        task.headings.find((h) =>
+                            this.stringIncludesCaseInsensitive(
+                                h,
+                                anyHeadingMatch[2],
+                            ),
+                        ) !== undefined,
+                );
+            } else if (filterMethod === 'does not include') {
+                this._filters.push(
+                    (task: Task) =>
+                        task.headings.find((h) =>
+                            this.stringIncludesCaseInsensitive(
+                                h,
+                                anyHeadingMatch[2],
+                            ),
+                        ) === undefined,
+                );
+            } else {
+                this._error = 'do not understand query filter (any heading)';
+            }
+        } else {
+            this._error = 'do not understand query filter (any heading)';
         }
     }
 

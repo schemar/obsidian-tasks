@@ -10,6 +10,7 @@ function fromLine(line: string, path = '') {
         line,
         path,
         precedingHeader: '',
+        headings: [''],
         sectionIndex: 0,
         sectionStart: 0,
     })!;

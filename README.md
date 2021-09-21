@@ -214,6 +214,8 @@ The following query options exist:
     - Always tries to match the closest heading above the task, regardless of heading level.
     - `does not include` will match a task that does not have a preceding heading in its file.
     - Matches case-insensitive (disregards capitalization).
+- `any heading (includes|does not include) <string>`
+    - Same as above but also match parent headings
 - `exclude sub-items`
     - When this is set, the result list will only include tasks that are not indented in their file. It will only show tasks that are top level list items in their list.
 - `limit to <number> tasks`

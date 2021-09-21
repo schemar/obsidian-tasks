@@ -26,6 +26,7 @@ export class Task {
      */
     public readonly originalStatusCharacter: string;
     public readonly precedingHeader: string | null;
+    public readonly headings: string[];
     public readonly dueDate: Moment | null;
     public readonly doneDate: Moment | null;
     public readonly recurrenceRule: RRule | null;
@@ -50,6 +51,7 @@ export class Task {
         sectionIndex,
         originalStatusCharacter,
         precedingHeader,
+        headings,
         dueDate,
         doneDate,
         recurrenceRule,
@@ -63,6 +65,7 @@ export class Task {
         sectionIndex: number;
         originalStatusCharacter: string;
         precedingHeader: string | null;
+        headings: string[];
         dueDate: moment.Moment | null;
         doneDate: moment.Moment | null;
         recurrenceRule: RRule | null;
@@ -76,6 +79,7 @@ export class Task {
         this.sectionIndex = sectionIndex;
         this.originalStatusCharacter = originalStatusCharacter;
         this.precedingHeader = precedingHeader;
+        this.headings = headings;
         this.dueDate = dueDate;
         this.doneDate = doneDate;
         this.recurrenceRule = recurrenceRule;
@@ -88,12 +92,14 @@ export class Task {
         sectionStart,
         sectionIndex,
         precedingHeader,
+        headings,
     }: {
         line: string;
         path: string;
         sectionStart: number;
         sectionIndex: number;
         precedingHeader: string | null;
+        headings: string[];
     }): Task | null {
         const regexMatch = line.match(Task.taskRegex);
         if (regexMatch === null) {
@@ -183,6 +189,7 @@ export class Task {
             sectionIndex,
             originalStatusCharacter: statusString,
             precedingHeader,
+            headings,
             dueDate,
             doneDate,
             recurrenceRule,

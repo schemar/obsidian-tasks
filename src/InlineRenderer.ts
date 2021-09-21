@@ -60,6 +60,7 @@ export class InlineRenderer {
                 sectionStart: section.lineStart,
                 sectionIndex,
                 precedingHeader: null, // We don't need the preceding header for in-line rendering.
+                headings: [],
             });
             if (task !== null) {
                 fileTasks.push(task);
