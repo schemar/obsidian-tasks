@@ -51,14 +51,20 @@ describe('Query', () => {
     });
 
     describe('sorting instructions', () => {
-        const cases: { input: string; output: string[] }[] = [
+        const cases: {
+            input: string;
+            output: { property: string; reverse: boolean }[];
+        }[] = [
             {
                 input: 'sort by status',
-                output: ['status'],
+                output: [{ property: 'status', reverse: false }],
             },
             {
                 input: 'sort by status\nsort by due',
-                output: ['status', 'due'],
+                output: [
+                    { property: 'status', reverse: false },
+                    { property: 'due', reverse: false },
+                ],
             },
         ];
         test.each(cases)('sorting as %p', ({ input, output }) => {

@@ -3,14 +3,17 @@ import { LayoutOptions } from './LayoutOptions';
 
 import { Status, Task } from './Task';
 
-type Sorting = 'status' | 'due' | 'done' | 'path' | 'description';
+export type Sorting = 'status' | 'due' | 'done' | 'path' | 'description';
 
 export class Query {
     private _limit: number | undefined = undefined;
     private _layoutOptions: LayoutOptions = new LayoutOptions();
     private _filters: ((task: Task) => boolean)[] = [];
     private _error: string | undefined = undefined;
-    private _sorting: Sorting[] = [];
+    private _sorting: {
+        property: Sorting;
+        reverse: boolean;
+    }[] = [];
 
     private readonly noDueString = 'no due date';
     private readonly dueRegexp = /^due (before|after|on)? ?(.*)/;
@@ -23,7 +26,7 @@ export class Query {
     private readonly descriptionRegexp =
         /^description (includes|does not include) (.*)/;
     private readonly sortByRegexp =
-        /^sort by (status|due|done|path|description)/;
+        /^sort by (status|due|done|path|description)( reverse)?/;
 
     private readonly headingRegexp =
         /^heading (includes|does not include) (.*)/;
@@ -113,7 +116,7 @@ export class Query {
         return this._filters;
     }
 
-    public get sorting(): Sorting[] {
+    public get sorting() {
         return this._sorting;
     }
 
@@ -289,7 +292,10 @@ export class Query {
     private parseSortBy({ line }: { line: string }): void {
         const fieldMatch = line.match(this.sortByRegexp);
         if (fieldMatch !== null) {
-            this._sorting.push(fieldMatch[1] as Sorting);
+            this._sorting.push({
+                property: fieldMatch[1] as Sorting,
+                reverse: !!fieldMatch[2],
+            });
         } else {
             this._error = 'do not understand query sorting';
         }

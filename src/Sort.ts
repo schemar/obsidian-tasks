@@ -1,45 +1,51 @@
 import type { Task } from './Task';
-import type { Query } from './Query';
+import type { Query, Sorting } from './Query';
 import type moment from 'moment';
 
 type Comparator = (a: Task, b: Task) => number;
 
 export class Sort {
     public static by(query: Pick<Query, 'sorting'>, tasks: Task[]): Task[] {
-        let sortedTasks = [...tasks];
-        const defaultComparators: Comparator[] = [
+        const comparators: Comparator[] = [
             this.compareByPath,
             this.compareByDueDate,
             this.compareByStatus,
         ];
 
-        const userComparators: Comparator[] = [];
-        for (const sortProp of query.sorting) {
-            switch (sortProp) {
-                case 'status':
-                    userComparators.unshift(this.compareByStatus);
-                    break;
-                case 'due':
-                    userComparators.unshift(this.compareByDueDate);
-                    break;
-                case 'done':
-                    userComparators.unshift(this.compareByDoneDate);
-                    break;
-                case 'path':
-                    userComparators.unshift(this.compareByPath);
-                    break;
-                case 'description':
-                    userComparators.unshift(this.compareByDescription);
-                    break;
+        for (const { property, reverse } of query.sorting.reverse()) {
+            const comparator = this.comparators[property];
+            comparators.unshift(
+                reverse ? this.makeReversedComparator(comparator) : comparator,
+            );
+        }
+
+        return tasks.sort(Sort.makeCompositeComparator(comparators));
+    }
+
+    private static comparators: Record<Sorting, Comparator> = {
+        status: Sort.compareByStatus,
+        done: Sort.compareByDoneDate,
+        due: Sort.compareByDueDate,
+        path: Sort.compareByPath,
+        description: Sort.compareByDescription,
+    };
+
+    private static makeReversedComparator(comparator: Comparator): Comparator {
+        return (a, b) => (comparator(a, b) * -1) as -1 | 0 | 1;
+    }
+
+    private static makeCompositeComparator(
+        comparators: Comparator[],
+    ): Comparator {
+        return (a, b) => {
+            for (const comparator of comparators) {
+                const result = comparator(a, b);
+                if (result !== 0) {
+                    return result;
+                }
             }
-        }
-
-        const comparators = defaultComparators.concat(userComparators);
-        for (const comparator of comparators) {
-            sortedTasks = sortedTasks.sort(comparator);
-        }
-
-        return sortedTasks;
+            return 0;
+        };
     }
 
     private static compareByStatus(a: Task, b: Task): -1 | 0 | 1 {
