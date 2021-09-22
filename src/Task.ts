@@ -2,7 +2,11 @@ import { Component, MarkdownRenderer } from 'obsidian';
 import { RRule } from 'rrule';
 
 import { replaceTaskWithTasks } from './File';
-import { getSettings } from './Settings';
+import {
+    defaultSettings,
+    dueDateMarkerDefaultAlternatives,
+    getSettings,
+} from './Settings';
 import { LayoutOptions } from './LayoutOptions';
 import type { Moment } from 'moment';
 
@@ -27,19 +31,16 @@ export class Task {
     public readonly originalStatusCharacter: string;
     public readonly precedingHeader: string | null;
     public readonly dueDate: Moment | null;
+    public readonly dueDateBacklink: boolean | null;
     public readonly doneDate: Moment | null;
+    public readonly doneDateBacklink: boolean | null;
     public readonly recurrenceRule: RRule | null;
     /** The blockLink is a "^" annotation after the dates/recurrence rules. */
     public readonly blockLink: string;
 
     public static readonly dateFormat = 'YYYY-MM-DD';
     public static readonly taskRegex = /^([\s\t]*)[-*] +\[(.)\] *(.*)/u;
-    // The following regexes end with `$` because they will be matched and
-    // removed from the end until none are left.
-    public static readonly dueDateRegex = /[📅📆🗓] ?(\d{4}-\d{2}-\d{2})$/u;
-    public static readonly doneDateRegex = /✅ ?(\d{4}-\d{2}-\d{2})$/u;
-    public static readonly recurrenceRegex = /🔁([a-zA-Z0-9, !]+)$/u;
-    public static readonly blockLinkRegex = / \^[a-zA-Z0-9-]+$/u;
+    public static readonly blockLinkRegex = /[\s\t]+\^[a-zA-Z0-9-]+$/u;
 
     constructor({
         status,
@@ -51,7 +52,9 @@ export class Task {
         originalStatusCharacter,
         precedingHeader,
         dueDate,
+        dueDateBacklink,
         doneDate,
+        doneDateBacklink,
         recurrenceRule,
         blockLink,
     }: {
@@ -64,7 +67,9 @@ export class Task {
         originalStatusCharacter: string;
         precedingHeader: string | null;
         dueDate: moment.Moment | null;
+        dueDateBacklink: boolean | null;
         doneDate: moment.Moment | null;
+        doneDateBacklink: boolean | null;
         recurrenceRule: RRule | null;
         blockLink: string;
     }) {
@@ -77,7 +82,9 @@ export class Task {
         this.originalStatusCharacter = originalStatusCharacter;
         this.precedingHeader = precedingHeader;
         this.dueDate = dueDate;
+        this.dueDateBacklink = dueDateBacklink;
         this.doneDate = doneDate;
+        this.doneDateBacklink = doneDateBacklink;
         this.recurrenceRule = recurrenceRule;
         this.blockLink = blockLink;
     }
@@ -95,6 +102,32 @@ export class Task {
         sectionIndex: number;
         precedingHeader: string | null;
     }): Task | null {
+        // The following regexes end with `$` because they will be matched and
+        // removed from the end until none are left.
+        const dateRegexString = '(\\[\\[)?(\\d{4}-\\d{2}-\\d{2})(\\]\\])?';
+        const {
+            dueDateMarker,
+            doneDateMarker,
+            globalFilter,
+            recurrenceMarker,
+        } = getSettings();
+        const dueDateRegex = new RegExp(
+            `${
+                dueDateMarker === defaultSettings.dueDateMarker
+                    ? '[' + dueDateMarkerDefaultAlternatives + ']'
+                    : dueDateMarker
+            }\\s*?${dateRegexString}$`,
+            'u',
+        );
+        const doneDateRegex = new RegExp(
+            `${doneDateMarker}\\s*?${dateRegexString}$`,
+            'u',
+        );
+        const recurrenceRegex = new RegExp(
+            `${recurrenceMarker}\\s*?([a-zA-Z0-9, !]+)$`,
+            'u',
+        );
+
         const regexMatch = line.match(Task.taskRegex);
         if (regexMatch === null) {
             return null;
@@ -115,7 +148,6 @@ export class Task {
         // match[3] includes the whole body of the task after the brackets.
         const body = regexMatch[3].trim();
 
-        const { globalFilter } = getSettings();
         if (!body.includes(globalFilter)) {
             return null;
         }
@@ -134,30 +166,34 @@ export class Task {
         // strings are in the expected order after the description.
         let matched: boolean;
         let dueDate: Moment | null = null;
+        let dueDateBacklink: boolean = false;
         let doneDate: Moment | null = null;
+        let doneDateBacklink: boolean = false;
         let recurrenceRule: RRule | null = null;
         // Add a "max runs" failsafe to never end in an endless loop:
         const maxRuns = 4;
         let runs = 0;
         do {
             matched = false;
-            const doneDateMatch = description.match(Task.doneDateRegex);
+            const doneDateMatch = description.match(doneDateRegex);
             if (doneDateMatch !== null) {
-                doneDate = window.moment(doneDateMatch[1], Task.dateFormat);
-                description = description
-                    .replace(Task.doneDateRegex, '')
-                    .trim();
+                doneDate = window.moment(doneDateMatch[2], Task.dateFormat);
+                doneDateBacklink =
+                    doneDateMatch[1] === '[[' && doneDateMatch[3] === ']]';
+                description = description.replace(doneDateRegex, '').trim();
                 matched = true;
             }
 
-            const dueDateMatch = description.match(Task.dueDateRegex);
+            const dueDateMatch = description.match(dueDateRegex);
             if (dueDateMatch !== null) {
-                dueDate = window.moment(dueDateMatch[1], Task.dateFormat);
-                description = description.replace(Task.dueDateRegex, '').trim();
+                dueDate = window.moment(dueDateMatch[2], Task.dateFormat);
+                dueDateBacklink =
+                    dueDateMatch[1] === '[[' && dueDateMatch[3] === ']]';
+                description = description.replace(dueDateRegex, '').trim();
                 matched = true;
             }
 
-            const recurrenceMatch = description.match(Task.recurrenceRegex);
+            const recurrenceMatch = description.match(recurrenceRegex);
             if (recurrenceMatch !== null) {
                 try {
                     recurrenceRule = RRule.fromText(recurrenceMatch[1].trim());
@@ -165,9 +201,7 @@ export class Task {
                     // Could not read recurrence rule. User possibly not done typing.
                 }
 
-                description = description
-                    .replace(Task.recurrenceRegex, '')
-                    .trim();
+                description = description.replace(recurrenceRegex, '').trim();
                 matched = true;
             }
 
@@ -184,7 +218,9 @@ export class Task {
             originalStatusCharacter: statusString,
             precedingHeader,
             dueDate,
+            dueDateBacklink,
             doneDate,
+            doneDateBacklink,
             recurrenceRule,
             blockLink,
         });
@@ -275,23 +311,34 @@ export class Task {
         layoutOptions = layoutOptions ?? new LayoutOptions();
         let taskString = this.description;
 
+        const { doneDateMarker, dueDateMarker, recurrenceMarker } =
+            getSettings();
+
         if (!layoutOptions.hideRecurrenceRule) {
             const recurrenceRule: string = this.recurrenceRule
-                ? ` 🔁 ${this.recurrenceRule.toText()}`
+                ? ` ${recurrenceMarker} ${this.recurrenceRule.toText()}`
                 : '';
             taskString += recurrenceRule;
         }
 
         if (!layoutOptions.hideDueDate) {
             const dueDate: string = this.dueDate
-                ? ` 📅 ${this.dueDate.format(Task.dateFormat)}`
+                ? ` ${dueDateMarker} ${
+                      this.dueDateBacklink ? '[[' : ''
+                  }${this.dueDate.format(Task.dateFormat)}${
+                      this.dueDateBacklink ? ']]' : ''
+                  }`
                 : '';
             taskString += dueDate;
         }
 
         if (!layoutOptions.hideDoneDate) {
             const doneDate: string = this.doneDate
-                ? ` ✅ ${this.doneDate.format(Task.dateFormat)}`
+                ? ` ${doneDateMarker} ${
+                      this.doneDateBacklink ? '[[' : ''
+                  }${this.doneDate.format(Task.dateFormat)}${
+                      this.doneDateBacklink ? ']]' : ''
+                  }`
                 : '';
             taskString += doneDate;
         }
@@ -314,6 +361,7 @@ export class Task {
      * task is not recurring, it will return `[toggled]`.
      */
     public toggle(): Task[] {
+        const { makeDatesBacklinks } = getSettings();
         const newStatus: Status =
             this.status === Status.Todo ? Status.Done : Status.Todo;
         let newDoneDate = null;
@@ -353,7 +401,9 @@ export class Task {
         const toggledTask = new Task({
             ...this,
             status: newStatus,
+            dueDateBacklink: makeDatesBacklinks,
             doneDate: newDoneDate,
+            doneDateBacklink: makeDatesBacklinks,
             originalStatusCharacter: newStatus === Status.Done ? 'x' : ' ',
         });
 
@@ -363,6 +413,8 @@ export class Task {
             const nextTask = new Task({
                 ...this,
                 dueDate: nextOccurrence,
+                dueDateBacklink: makeDatesBacklinks,
+                doneDateBacklink: makeDatesBacklinks,
                 // New occurrences cannot have the same block link.
                 // And random block links don't help.
                 blockLink: '',

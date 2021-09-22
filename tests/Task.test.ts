@@ -64,11 +64,12 @@ it('allows signifier emojis as part of the description', () => {
     expect(
         task!.doneDate!.isSame(moment('2021-06-20', 'YYYY-MM-DD')),
     ).toStrictEqual(true);
-})
+});
 
 it('also works with block links and trailing spaces', () => {
     // Arrange
-    const line = '- [x] this is a ✅ done task 🗓 2021-09-12 ✅ 2021-06-20 ^my-precious  ';
+    const line =
+        '- [x] this is a ✅ done task 🗓 2021-09-12 ✅ 2021-06-20 ^my-precious  ';
     const path = 'this/is a path/to a/file.md';
     const sectionStart = 1337;
     const sectionIndex = 1209;
@@ -96,4 +97,4 @@ it('also works with block links and trailing spaces', () => {
         task!.doneDate!.isSame(moment('2021-06-20', 'YYYY-MM-DD')),
     ).toStrictEqual(true);
     expect(task!.blockLink).toEqual(' ^my-precious');
-})
+});

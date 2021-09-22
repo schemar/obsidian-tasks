@@ -70,7 +70,9 @@ const taskFromLine = ({ line, path }: { line: string; path: string }): Task => {
             indentation: '',
             originalStatusCharacter: ' ',
             dueDate: null,
+            dueDateBacklink: null,
             doneDate: null,
+            doneDateBacklink: null,
             recurrenceRule: null,
             // We don't need the following fields to edit here in the editor.
             sectionStart: 0,
@@ -100,7 +102,9 @@ const taskFromLine = ({ line, path }: { line: string; path: string }): Task => {
         originalStatusCharacter: statusString,
         blockLink,
         dueDate: null,
+        dueDateBacklink: null,
         doneDate: null,
+        doneDateBacklink: null,
         recurrenceRule: null,
         // We don't need the following fields to edit here in the editor.
         sectionStart: 0,
