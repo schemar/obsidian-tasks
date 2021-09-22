@@ -64,5 +64,33 @@ export class SettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     });
             });
+        new Setting(containerEl)
+            .setName('Task Date Format')
+            .setDesc('Set the date format for task due dates')
+            .addText((text) => {
+                const settings = getSettings();
+
+                text.setPlaceholder('YYYY-MM-DD')
+                    .setValue(settings.dateFormat)
+                    .onChange(async (value) => {
+                        updateSettings({ dateFormat: value });
+
+                        await this.plugin.saveSettings();
+                    });
+            });
+        new Setting(containerEl)
+            .setName('Date is a link')
+            .setDesc(
+                'Enabling this makes the due date a link to the Daily Notes Page',
+            )
+            .addToggle((toggle) => {
+                const settings = getSettings();
+
+                toggle.setValue(settings.dateLink).onChange(async (value) => {
+                    updateSettings({ dateLink: value });
+
+                    await this.plugin.saveSettings();
+                });
+            });
     }
 }

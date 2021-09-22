@@ -28,16 +28,17 @@ export class Task {
     public readonly precedingHeader: string | null;
     public readonly dueDate: Moment | null;
     public readonly doneDate: Moment | null;
+    public readonly dateFormat: string;
+    public readonly dateLink: boolean;
     public readonly recurrenceRule: RRule | null;
     /** The blockLink is a "^" annotation after the dates/recurrence rules. */
     public readonly blockLink: string;
-
-    public static readonly dateFormat = 'YYYY-MM-DD';
     public static readonly taskRegex = /^([\s\t]*)[-*] +\[(.)\] *(.*)/u;
     // The following regexes end with `$` because they will be matched and
     // removed from the end until none are left.
-    public static readonly dueDateRegex = /[📅📆🗓] ?(\d{4}-\d{2}-\d{2})$/u;
-    public static readonly doneDateRegex = /✅ ?(\d{4}-\d{2}-\d{2})$/u;
+    public static readonly dueDateRegex =
+        /[📅📆🗓] (\[\[)?([\w\-\s:]+)(\]\])?$/u;
+    public static readonly doneDateRegex = /✅ (\[\[)?([\w\-\s:]+)(\]\])?$/u;
     public static readonly recurrenceRegex = /🔁([a-zA-Z0-9, !]+)$/u;
     public static readonly blockLinkRegex = / \^[a-zA-Z0-9-]+$/u;
 
@@ -54,6 +55,8 @@ export class Task {
         doneDate,
         recurrenceRule,
         blockLink,
+        dateFormat,
+        dateLink,
     }: {
         status: Status;
         description: string;
@@ -67,6 +70,8 @@ export class Task {
         doneDate: moment.Moment | null;
         recurrenceRule: RRule | null;
         blockLink: string;
+        dateFormat: string;
+        dateLink: boolean;
     }) {
         this.status = status;
         this.description = description;
@@ -80,6 +85,8 @@ export class Task {
         this.doneDate = doneDate;
         this.recurrenceRule = recurrenceRule;
         this.blockLink = blockLink;
+        this.dateFormat = dateFormat;
+        this.dateLink = dateLink;
     }
 
     public static fromLine({
@@ -115,7 +122,7 @@ export class Task {
         // match[3] includes the whole body of the task after the brackets.
         const body = regexMatch[3].trim();
 
-        const { globalFilter } = getSettings();
+        const { globalFilter, dateLink, dateFormat } = getSettings();
         if (!body.includes(globalFilter)) {
             return null;
         }
@@ -143,18 +150,32 @@ export class Task {
             matched = false;
             const doneDateMatch = description.match(Task.doneDateRegex);
             if (doneDateMatch !== null) {
-                doneDate = window.moment(doneDateMatch[1], Task.dateFormat);
-                description = description
-                    .replace(Task.doneDateRegex, '')
-                    .trim();
-                matched = true;
+                const match = doneDateMatch[2];
+                const isValid = window
+                    .moment(match, dateFormat, true)
+                    .isValid();
+                if (isValid) {
+                    doneDate = window.moment(match, dateFormat, true);
+                    description = description
+                        .replace(Task.doneDateRegex, '')
+                        .trim();
+                    matched = true;
+                }
             }
 
             const dueDateMatch = description.match(Task.dueDateRegex);
             if (dueDateMatch !== null) {
-                dueDate = window.moment(dueDateMatch[1], Task.dateFormat);
-                description = description.replace(Task.dueDateRegex, '').trim();
-                matched = true;
+                const match = dueDateMatch[2];
+                const isValid = window
+                    .moment(match, dateFormat, true)
+                    .isValid();
+                if (isValid) {
+                    dueDate = window.moment(match, dateFormat, true);
+                    description = description
+                        .replace(Task.dueDateRegex, '')
+                        .trim();
+                    matched = true;
+                }
             }
 
             const recurrenceMatch = description.match(Task.recurrenceRegex);
@@ -187,6 +208,8 @@ export class Task {
             doneDate,
             recurrenceRule,
             blockLink,
+            dateFormat,
+            dateLink,
         });
 
         return task;
@@ -284,14 +307,18 @@ export class Task {
 
         if (!layoutOptions.hideDueDate) {
             const dueDate: string = this.dueDate
-                ? ` 📅 ${this.dueDate.format(Task.dateFormat)}`
+                ? this.dateLink
+                    ? `📅 [[${this.dueDate.format(this.dateFormat)}]]`
+                    : ` 📅 ${this.dueDate.format(this.dateFormat)}`
                 : '';
             taskString += dueDate;
         }
 
         if (!layoutOptions.hideDoneDate) {
             const doneDate: string = this.doneDate
-                ? ` ✅ ${this.doneDate.format(Task.dateFormat)}`
+                ? this.dateLink
+                    ? ` ✅ [[${this.doneDate.format(this.dateFormat)}]]`
+                    : ` ✅ ${this.doneDate.format(this.dateFormat)}`
                 : '';
             taskString += doneDate;
         }

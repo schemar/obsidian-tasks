@@ -121,6 +121,18 @@ If you don't have a global filter set, all regular checklist items work:
 ```
 - [ ] take out the trash
 ```
+### Date Formatting & Linking
+
+ℹ️ You can set a custom date format in the settings (the default is `YYYY-MM-DD`). The custo formatting must match a [moment.js date format](https://momentjs.com/docs/#/displaying/format/). Changing the date format will do two things:
+
+1. Due and done dates will appear in the specified format
+2. The parser will look for your custom format when displaying task query results
+
+**You must write the due or done date in the correct format when creating a task. Using the `Tasks: Create or edit` command will generate the proper format for your due dates.**
+
+ℹ️ You can toggle if due and done dates should be links in the settings. This is useful when linking tasks to your Daily Notes Page. Toggling this setting on will make due and done dates links while in preview mode.
+
+Due and done dates can be written as bare dates (`YYYY-MM-DD`) or linked dates (`[YYYY-MM-DD]`) in edit mode. If `Date is link` is toggled one, both formats will appear as a link in preview mode.
 
 ### Due dates
 
