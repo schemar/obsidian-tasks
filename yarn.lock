@@ -2570,10 +2570,10 @@ esbuild-sunos-64@0.15.6:
   resolved "https://registry.yarnpkg.com/esbuild-sunos-64/-/esbuild-sunos-64-0.15.6.tgz#9668f39e47179f50c0435040904b9c6e10e84a70"
   integrity sha512-1ceefLdPWcd1nW/ZLruPEYxeUEAVX0YHbG7w+BB4aYgfknaLGotI/ZvPWUZpzhC8l1EybrVlz++lm3E6ODIJOg==
 
-esbuild-svelte@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/esbuild-svelte/-/esbuild-svelte-0.8.0.tgz#a64d6e7f3df0a111fca939f8fd2917cceea7aa91"
-  integrity sha512-uKcPf1kl2UGMjrfHChv4dLxGAvCNhf9s72mHo19ZhKP+LrVOuQkOM/g8GE7MiGpoqjpk8UHqL08uLRbSKXhmhw==
+esbuild-svelte@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/esbuild-svelte/-/esbuild-svelte-0.8.2.tgz#f6c09b57879caabd068685684b47f42dbd266396"
+  integrity sha512-tG97WrhH/OH8wFCmRBk6sRggMVMPNZDktGx1jJcvh9Obvjwm8M1UYoXmliuLL+4fs/wfyVVwM2fvyNYz2e6UPQ==
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.19"
 
