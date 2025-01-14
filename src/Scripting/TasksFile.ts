@@ -19,7 +19,10 @@ export class TasksFile {
         const rawFrontmatter = cachedMetadata.frontmatter;
         if (rawFrontmatter !== undefined) {
             this._frontmatter = JSON.parse(JSON.stringify(rawFrontmatter));
-            this._frontmatter.tags = parseFrontMatterTags(rawFrontmatter) ?? [];
+            // protect against null tags (happens in my vault)
+            if (this._frontmatter) {
+                this._frontmatter.tags = parseFrontMatterTags(rawFrontmatter) ?? [];
+            }
         }
 
         if (Object.keys(cachedMetadata).length !== 0) {
