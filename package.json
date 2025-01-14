@@ -72,7 +72,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.6.12",
     "boon-js": "^2.0.5",
-    "chrono-node": "2.3.9",
+    "chrono-node": "2.7.7",
     "eslint-plugin-svelte3": "^4.0.0",
     "eventemitter2": "^6.4.5",
     "flatpickr": "^4.6.13",
