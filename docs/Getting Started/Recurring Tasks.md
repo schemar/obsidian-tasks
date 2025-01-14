@@ -30,7 +30,7 @@ Take as an example the following task:
 - [ ] take out the trash 🔁 every Sunday 📅 2021-04-25
 ```
 
-If you mark the above task "done", the file will now look like this:
+If you mark the above task "done" one day early on 24 April 2021, the file will now look like this:
 
 ```markdown
 - [ ] take out the trash 🔁 every Sunday 📅 2021-05-02
@@ -42,8 +42,8 @@ The next Sunday after 25 April 2021 is on 2 May.
 Alternatively, if you have enabled addition of [[Dates#Created date|created dates]], the file will instead now look like this, showing the date that the new task was created:
 
 ```markdown
-- [ ] take out the trash 🔁 every Sunday ➕ 2023-03-10 📅 2021-05-02
-- [x] take out the trash 🔁 every Sunday 📅 2021-04-25 ✅ 2023-03-10
+- [ ] take out the trash 🔁 every Sunday ➕ 2021-04-24 📅 2021-05-02
+- [x] take out the trash 🔁 every Sunday 📅 2021-04-25 ✅ 2021-04-24
 ```
 
 ### Order of the new task
@@ -65,11 +65,11 @@ Use this setting to control where the recurring task is inserted. The default is
 When you create a recurring task, you can decide whether the next occurrence should be based on the original dates or the date when you completed the task.
 The default behavior results in newly created tasks having dates relative to the original task rather than "today".
 
-For example, given that today is the 13. February 2022 and you just completed the lower task:
+For example, given that today is the 13 February 2022 and you just completed the lower task:
 
 ```markdown
-- [ ] sweep the floors 🔁 every week ⏳ 2021-02-13
-- [x] sweep the floors 🔁 every week ⏳ 2021-02-06 ✅ 2022-02-13
+- [ ] sweep the floors 🔁 every week ⏳ 2022-02-13
+- [x] sweep the floors 🔁 every week ⏳ 2022-02-06 ✅ 2022-02-13
 ```
 
 Regardless of you having missed the original scheduled date by a week,
@@ -81,7 +81,7 @@ Below is the same example as above, but this time the new task is scheduled base
 
 ```markdown
 - [ ] sweep the floors 🔁 every week when done ⏳ 2022-02-20
-- [x] sweep the floors 🔁 every week when done ⏳ 2021-02-06 ✅ 2022-02-13
+- [x] sweep the floors 🔁 every week when done ⏳ 2022-02-06 ✅ 2022-02-13
 ```
 
 Now the newly created task is scheduled 1 week after the task was completed rather than 1 week after it was originally scheduled.
